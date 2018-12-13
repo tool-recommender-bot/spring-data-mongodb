@@ -35,7 +35,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.geo.GeoResults;
-import org.springframework.data.geo.Metric;
 import org.springframework.data.geo.Metrics;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
@@ -82,7 +81,7 @@ public class GeoJsonTests {
 	@Before
 	public void setUp() {
 
-		template.setWriteConcern(WriteConcern.FSYNC_SAFE);
+		template.setWriteConcern(WriteConcern.ACKNOWLEDGED);
 
 		createIndex();
 		addVenues();
@@ -103,7 +102,22 @@ public class GeoJsonTests {
 		GeoResults<Venue2DSphere> result = template.geoNear(geoNear, Venue2DSphere.class);
 
 		assertThat(result.getContent().size(), is(not(0)));
-		assertThat(result.getAverageDistance().getMetric(), is((Metric) Metrics.KILOMETERS));
+		assertThat(result.getAverageDistance().getMetric(), is(Metrics.KILOMETERS));
+	}
+
+	@Test // DATAMONGO-1148
+	public void geoNearShouldReturnDistanceCorrectlyUsingGeoJson/*which is using the meters*/() {
+
+		NearQuery geoNear = NearQuery.near(new GeoJsonPoint(-73.99171, 40.738868), Metrics.KILOMETERS).num(10)
+				.maxDistance(0.4);
+
+		GeoResults<Venue2DSphere> result = template.geoNear(geoNear, Venue2DSphere.class);
+
+		assertThat(result.getContent().size(), is(equalTo(3)));
+		assertThat(result.getAverageDistance().getMetric(), is(Metrics.KILOMETERS));
+		assertThat(result.getContent().get(0).getDistance().getValue(), is(closeTo(0.0, 0.000001)));
+		assertThat(result.getContent().get(1).getDistance().getValue(), is(closeTo(0.0693582, 0.000001)));
+		assertThat(result.getContent().get(2).getDistance().getValue(), is(closeTo(0.0693582, 0.000001)));
 	}
 
 	@Test // DATAMONGO-1135
@@ -114,7 +128,7 @@ public class GeoJsonTests {
 		GeoResults<Venue2DSphere> result = template.geoNear(geoNear, Venue2DSphere.class);
 
 		assertThat(result.getContent().size(), is(not(0)));
-		assertThat(result.getAverageDistance().getMetric(), is((Metric) Metrics.MILES));
+		assertThat(result.getAverageDistance().getMetric(), is(Metrics.MILES));
 	}
 
 	@Test // DATAMONGO-1135

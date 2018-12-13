@@ -30,10 +30,7 @@ import org.springframework.data.geo.Metrics;
  */
 public class MetricConversionUnitTests {
 
-	/**
-	 * @see DATAMONGO-1348
-	 */
-	@Test
+	@Test // DATAMONGO-1348
 	public void shouldConvertMilesToMeters() {
 
 		Distance distance = new Distance(1, Metrics.MILES);
@@ -42,10 +39,7 @@ public class MetricConversionUnitTests {
 		assertThat(distanceInMeters, is(closeTo(1609.3438343d, 0.000000001)));
 	}
 
-	/**
-	 * @see DATAMONGO-1348
-	 */
-	@Test
+	@Test // DATAMONGO-1348
 	public void shouldConvertKilometersToMeters() {
 
 		Distance distance = new Distance(1, Metrics.KILOMETERS);
@@ -54,10 +48,7 @@ public class MetricConversionUnitTests {
 		assertThat(distanceInMeters, is(closeTo(1000, 0.000000001)));
 	}
 
-	/**
-	 * @see DATAMONGO-1348
-	 */
-	@Test
+	@Test // DATAMONGO-1348
 	public void shouldCalculateMetersToKilometersMultiplier() {
 
 		double multiplier = MetricConversion.getMetersToMetricMultiplier(Metrics.KILOMETERS);
@@ -65,10 +56,7 @@ public class MetricConversionUnitTests {
 		assertThat(multiplier, is(closeTo(0.001, 0.000000001)));
 	}
 
-	/**
-	 * @see DATAMONGO-1348
-	 */
-	@Test
+	@Test // DATAMONGO-1348
 	public void shouldCalculateMetersToMilesMultiplier() {
 
 		double multiplier = MetricConversion.getMetersToMetricMultiplier(Metrics.MILES);
